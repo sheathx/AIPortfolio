@@ -26,6 +26,10 @@
     <main id="home" class="page-shell">
       <div class="watermark" aria-hidden="true">Raheem</div>
       <section class="response-stage" data-response-stage hidden aria-live="polite">
+        <button class="chat-close-button" type="button" data-close-chat aria-label="Back to homepage">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"></path><path d="m12 19-7-7 7-7"></path></svg>
+          <span>Home</span>
+        </button>
         <div class="chat-avatar" aria-hidden="true">
           <img src="./assets/portfolio-avatar.png" alt="">
         </div>
@@ -75,22 +79,57 @@
         <div class="chat-log" data-chat-log aria-live="polite" hidden></div>
       </section>
 
-      <section class="highlights" aria-label="Resume highlights">
-        <article>
-          <span>Current</span>
-          <strong>Systems Engineer</strong>
-          <p>Sutherland Global Services, supporting end users, deployments, documentation, virtual desktop, VPN, and endpoint compliance.</p>
-        </article>
-        <article>
-          <span>Projects</span>
-          <strong>Medi-Link & Begoogable</strong>
-          <p>NFC emergency medical data design and AI-powered website generation with editable structures and stronger local business content.</p>
-        </article>
-        <article>
-          <span>Education</span>
-          <strong>B.S. Computer Science</strong>
-          <p>University of the People, with Java, C, systems analysis, database concepts, and GUI coursework.</p>
-        </article>
+      <section class="folder-section" aria-label="Portfolio folders">
+        <div class="folder-stage" data-folder-stage hidden>
+          <div class="folder-stage-header">
+            <div>
+              <p class="eyebrow">Open folder</p>
+              <h2 data-folder-title>Experience</h2>
+            </div>
+            <button class="icon-button" type="button" data-close-folder aria-label="Close folder">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
+          </div>
+          <div class="folder-card-row" data-folder-cards></div>
+        </div>
+
+        <div class="folder-grid">
+          <button class="portfolio-folder" type="button" data-folder="experience" aria-expanded="false">
+            <span class="folder-previews" aria-hidden="true">
+              <span>Resume</span>
+              <span>Sutherland</span>
+              <span>Support</span>
+            </span>
+            <span class="folder-body">
+              <strong>Experience</strong>
+              <small>Resume and work history</small>
+            </span>
+          </button>
+
+          <button class="portfolio-folder" type="button" data-folder="projects" aria-expanded="false">
+            <span class="folder-previews" aria-hidden="true">
+              <span>Medi-Link</span>
+              <span>AI Sites</span>
+              <span>Rust</span>
+            </span>
+            <span class="folder-body">
+              <strong>Projects</strong>
+              <small>Current builds and studies</small>
+            </span>
+          </button>
+
+          <button class="portfolio-folder" type="button" data-folder="education" aria-expanded="false">
+            <span class="folder-previews" aria-hidden="true">
+              <span>UoPeople</span>
+              <span>CS50</span>
+              <span>Courses</span>
+            </span>
+            <span class="folder-body">
+              <strong>Education</strong>
+              <small>Schools, courses, certificates</small>
+            </span>
+          </button>
+        </div>
       </section>
     </main>
 

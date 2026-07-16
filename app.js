@@ -69,6 +69,116 @@ Language: English.
   const quickToggle = document.querySelector("[data-toggle-prompts]");
   const quickToggleLabel = document.querySelector("[data-toggle-label]");
   const promptGrid = document.querySelector(".prompt-grid");
+  const closeChat = document.querySelector("[data-close-chat]");
+  const folderStage = document.querySelector("[data-folder-stage]");
+  const folderTitle = document.querySelector("[data-folder-title]");
+  const folderCards = document.querySelector("[data-folder-cards]");
+  const closeFolder = document.querySelector("[data-close-folder]");
+  const folderButtons = Array.from(document.querySelectorAll("[data-folder]"));
+
+  const folderContent = {
+    experience: {
+      title: "Experience",
+      cards: [
+        {
+          type: "download",
+          kicker: "PDF Resume",
+          title: "Download CV",
+          body: "A one-page resume with support experience, systems work, selected projects, education, and core tools.",
+          meta: "Raheem-Burgess-Resume.pdf",
+          href: "./assets/Raheem-Burgess-Resume.pdf"
+        },
+        {
+          kicker: "Feb 2024 - Present",
+          title: "Systems Engineer",
+          body: "Daily technical support, workstation troubleshooting, remote-work access, virtual desktop support, endpoint follow-up, deployment coordination, and user documentation.",
+          meta: "Sutherland Global Services"
+        },
+        {
+          kicker: "2020 - 2023",
+          title: "Infrastructure Specialist",
+          body: "Email, phone, chat, and remote support for workstation, software, access, remote desktop, and connectivity issues with ticket ownership from intake to escalation.",
+          meta: "Sutherland Global Services"
+        },
+        {
+          kicker: "Operations",
+          title: "WAH Readiness",
+          body: "Centralized bluebook tracking client tools, VPN requirements, testing outcomes, readiness notes, and remote-work support procedures.",
+          meta: "Documentation and reporting"
+        }
+      ]
+    },
+    projects: {
+      title: "Projects",
+      cards: [
+        {
+          kicker: "NFC Medical System",
+          title: "Medi-Link",
+          body: "Emergency medical band concept with compact offline medical fields, UID links, checksums, record versions, and verification status.",
+          meta: "Product concept"
+        },
+        {
+          kicker: "AI Website Builder",
+          title: "Begoogable",
+          body: "AI-powered website generation for wireframes, landing pages, editable blocks, and stronger local business visibility.",
+          meta: "Currently building"
+        },
+        {
+          kicker: "Creative Skill",
+          title: "Motion Graphics",
+          body: "Studying motion design fundamentals for sharper product visuals, portfolio storytelling, and more polished interface animations.",
+          meta: "Currently learning"
+        },
+        {
+          kicker: "Creative Skill",
+          title: "Video Editing",
+          body: "Building editing skills for short-form demos, product walkthroughs, visual case studies, and stronger presentation work.",
+          meta: "Currently learning"
+        },
+        {
+          kicker: "Systems Language",
+          title: "Rust",
+          body: "Exploring Rust for safer systems programming, stronger low-level fundamentals, and a deeper understanding of performance-minded software.",
+          meta: "Currently studying"
+        }
+      ]
+    },
+    education: {
+      title: "Education",
+      cards: [
+        {
+          kicker: "In Progress",
+          title: "B.S. Computer Science",
+          body: "Coursework across programming, systems analysis, databases, data structures, Java, C, and software design fundamentals.",
+          meta: "University of the People"
+        },
+        {
+          kicker: "2022",
+          title: "B.S. Computing",
+          body: "Studied computing foundations before withdrawing and continuing the Computer Science path through University of the People.",
+          meta: "University of Technology, Jamaica"
+        },
+        {
+          kicker: "2018 - 2020",
+          title: "Diploma",
+          body: "Built academic foundations, communication habits, and early computing interests before moving into IT support and software learning.",
+          meta: "Ardenne Extension High"
+        },
+        {
+          kicker: "Online Study",
+          title: "CS50",
+          body: "A strong fit for strengthening computer science fundamentals, C programming, algorithms, and problem-solving practice.",
+          meta: "Self-directed learning"
+        },
+        {
+          kicker: "Certificates",
+          title: "Coursera / Online Courses",
+          body: "Space for ongoing certificates, professional courses, and skill tracks as new credentials are completed.",
+          meta: "Continuing education"
+        }
+      ]
+    }
+  };
 
   const richViews = {
     me: {
@@ -212,7 +322,35 @@ Language: English.
     return message;
   }
 
-  function enterChatMode(question) {
+  function syncChatHistory() {
+    if (window.history.state?.view === "chat") return;
+    window.history.pushState({ view: "chat" }, "", "#chat");
+  }
+
+  function exitChatMode(options = {}) {
+    pageShell.classList.remove("chat-mode", "prompts-hidden");
+    responseStage.hidden = true;
+    quickToggle.hidden = true;
+    quickToggleLabel.textContent = "Hide quick questions";
+    currentQuery.textContent = "";
+    responseContent.innerHTML = "";
+    responseContent.classList.remove("is-visible");
+    stageTyping.hidden = true;
+    input.value = "";
+    submit.disabled = true;
+    window.scrollTo({ top: 0, behavior: options.smooth === false ? "auto" : "smooth" });
+  }
+
+  function closeChatMode() {
+    if (window.history.state?.view === "chat") {
+      window.history.back();
+      return;
+    }
+    exitChatMode();
+  }
+
+  function enterChatMode(question, options = {}) {
+    if (options.updateHistory !== false) syncChatHistory();
     pageShell.classList.add("chat-mode");
     responseStage.hidden = false;
     quickToggle.hidden = false;
@@ -232,6 +370,59 @@ Language: English.
 
   function renderPlainAnswer(answer) {
     return `<section class="answer-section"><p>${escapeHtml(answer).replace(/\n+/g, "</p><p>")}</p></section>`;
+  }
+
+  function renderFolderCard(card, index) {
+    const style = `style="--card-index: ${index}"`;
+    const content = `
+      <span class="folder-card-kicker">${escapeHtml(card.kicker)}</span>
+      <strong>${escapeHtml(card.title)}</strong>
+      <p>${escapeHtml(card.body)}</p>
+      <span class="folder-card-meta">${escapeHtml(card.meta)}</span>
+    `;
+
+    if (card.type === "download") {
+      return `
+        <a class="folder-info-card download-card" href="${card.href}" download ${style}>
+          ${content}
+          <span class="download-pill">Download PDF</span>
+        </a>`;
+    }
+
+    return `<article class="folder-info-card" ${style}>${content}</article>`;
+  }
+
+  function openFolder(folderName) {
+    const selected = folderContent[folderName];
+    if (!selected) return;
+
+    folderTitle.textContent = selected.title;
+    folderCards.innerHTML = selected.cards.map(renderFolderCard).join("");
+    folderStage.hidden = false;
+    folderStage.dataset.activeFolder = folderName;
+
+    folderButtons.forEach((button) => {
+      const isActive = button.dataset.folder === folderName;
+      button.classList.toggle("is-active", isActive);
+      button.setAttribute("aria-expanded", String(isActive));
+    });
+
+    requestAnimationFrame(() => folderStage.classList.add("is-open"));
+  }
+
+  function closeFolderStage() {
+    folderStage.classList.remove("is-open");
+    folderButtons.forEach((button) => {
+      button.classList.remove("is-active");
+      button.setAttribute("aria-expanded", "false");
+    });
+    window.setTimeout(() => {
+      if (!folderStage.classList.contains("is-open")) {
+        folderStage.hidden = true;
+        folderCards.innerHTML = "";
+        delete folderStage.dataset.activeFolder;
+      }
+    }, 260);
   }
 
   function attachResponseControls() {
@@ -351,6 +542,26 @@ Language: English.
     button.addEventListener("click", () => showRichView(button.dataset.view, button.dataset.prompt || ""));
   });
 
+  closeChat.addEventListener("click", closeChatMode);
+
+  window.addEventListener("popstate", (event) => {
+    if (event.state?.view === "chat") return;
+    exitChatMode({ smooth: false });
+  });
+
+  folderButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      const isActive = button.classList.contains("is-active");
+      if (isActive) {
+        closeFolderStage();
+        return;
+      }
+      openFolder(button.dataset.folder);
+    });
+  });
+
+  closeFolder.addEventListener("click", closeFolderStage);
+
   quickToggle.addEventListener("click", () => {
     pageShell.classList.toggle("prompts-hidden");
     const hidden = pageShell.classList.contains("prompts-hidden");
@@ -396,6 +607,8 @@ Language: English.
     if (event.key === "Escape") {
       settings.hidden = true;
       profile.hidden = true;
+      closeFolderStage();
+      if (pageShell.classList.contains("chat-mode")) closeChatMode();
     }
   });
 
