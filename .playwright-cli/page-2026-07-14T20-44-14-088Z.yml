@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e3]:
+    - link "Raheem Burgess home" [ref=e4] [cursor=pointer]:
+      - /url: "#home"
+      - generic [ref=e5]: RB
+      - generic [ref=e6]: Raheem Burgess
+  - main [ref=e7]:
+    - generic: Raheem
+    - region [ref=e8]:
+      - generic [ref=e9]:
+        - button "Open profile details" [ref=e10] [cursor=pointer]: RB
+        - paragraph [ref=e11]: Hey, I'm Raheem
+        - heading "Systems Engineer" [level=1] [ref=e12]
+    - region "AI resume assistant" [ref=e14]:
+      - generic [ref=e15]:
+        - textbox "Ask a question about Raheem's CV" [ref=e16]:
+          - /placeholder: Ask me anything...
+        - button "Send question" [disabled] [ref=e17]
+      - generic "Suggested questions" [ref=e20]:
+        - button "Me" [ref=e21] [cursor=pointer]
+        - button "Projects" [ref=e23] [cursor=pointer]
+        - button "Skills" [ref=e25] [cursor=pointer]
+        - button "Fun" [ref=e27] [cursor=pointer]
+        - button "Contact" [ref=e29] [cursor=pointer]
+    - region "Resume highlights" [ref=e31]:
+      - article [ref=e32]:
+        - generic [ref=e33]: Current
+        - strong [ref=e34]: Systems Engineer
+        - paragraph [ref=e35]: Sutherland Global Services, supporting end users, deployments, documentation, virtual desktop, VPN, and endpoint compliance.
+      - article [ref=e36]:
+        - generic [ref=e37]: Projects
+        - strong [ref=e38]: Medi-Link & Begoogable
+        - paragraph [ref=e39]: NFC emergency medical data design and AI-powered website generation with editable structures and stronger local business content.
+      - article [ref=e40]:
+        - generic [ref=e41]: Education
+        - strong [ref=e42]: B.S. Computer Science
+        - paragraph [ref=e43]: University of the People, with Java, C, systems analysis, database concepts, and GUI coursework.

@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Raheem Burgess | AI Portfolio</title>
+    <meta name="description" content="Ask an AI portfolio questions about Raheem Burgess' resume, experience, projects, and skills.">
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <canvas id="fluid" aria-hidden="true"></canvas>
+
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Raheem Burgess home">
+        <span class="brand-mark">RB</span>
+        <span>Raheem Burgess</span>
+      </a>
+      <nav class="socials" aria-label="Social links">
+        <a href="https://github.com/sheathx" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/raheemkhalidburgess/" target="_blank" rel="noreferrer">LinkedIn</a>
+        <a href="https://x.com/imbrgs" target="_blank" rel="noreferrer">X</a>
+        <a href="https://www.instagram.com/imbrgs/" target="_blank" rel="noreferrer">Instagram</a>
+      </nav>
+    </header>
+
+    <main id="home" class="page-shell">
+      <div class="watermark" aria-hidden="true">Raheem</div>
+      <section class="response-stage" data-response-stage hidden aria-live="polite">
+        <div class="chat-avatar" aria-hidden="true">
+          <img src="./assets/portfolio-avatar.png" alt="">
+        </div>
+        <div class="query-bubble" data-current-query></div>
+        <div class="typing-row" data-stage-typing hidden>
+          <span></span><span></span><span></span>
+        </div>
+        <div class="response-content" data-response-content></div>
+      </section>
+
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <button class="logo-chip" type="button" data-open-panel aria-label="Open profile details">RB</button>
+          <p class="greeting">Hey, I'm Raheem</p>
+          <h1 id="hero-title">Systems Engineer</h1>
+        </div>
+
+        <div class="portrait-wrap" aria-hidden="true">
+          <img class="portrait" src="./assets/portfolio-avatar.png" alt="">
+        </div>
+      </section>
+
+      <section class="assistant-panel" aria-label="AI resume assistant">
+        <form class="question-form" data-question-form>
+          <input data-question-input type="text" autocomplete="off" placeholder="Ask me anything..." aria-label="Ask a question about Raheem's CV">
+          <button class="send-button" type="submit" aria-label="Send question" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+          </button>
+          <button class="settings-button" type="button" data-open-settings aria-label="AI settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.05.05a2.15 2.15 0 1 1-3.04 3.04l-.05-.05a1.8 1.8 0 0 0-1.98-.36 1.8 1.8 0 0 0-1.09 1.65v.14a2.15 2.15 0 1 1-4.3 0v-.14a1.8 1.8 0 0 0-1.09-1.65 1.8 1.8 0 0 0-1.98.36l-.05.05a2.15 2.15 0 1 1-3.04-3.04l.05-.05A1.8 1.8 0 0 0 4.6 15a1.8 1.8 0 0 0-1.65-1.09h-.14a2.15 2.15 0 1 1 0-4.3h.14A1.8 1.8 0 0 0 4.6 8.52a1.8 1.8 0 0 0-.36-1.98l-.05-.05a2.15 2.15 0 0 1 3.04-3.04l.05.05a1.8 1.8 0 0 0 1.98.36h.01A1.8 1.8 0 0 0 10.35 2.2v-.05a2.15 2.15 0 1 1 4.3 0v.14a1.8 1.8 0 0 0 1.09 1.65 1.8 1.8 0 0 0 1.98-.36l.05-.05a2.15 2.15 0 1 1 3.04 3.04l-.05.05a1.8 1.8 0 0 0-.36 1.98v.01a1.8 1.8 0 0 0 1.65 1.08h.14a2.15 2.15 0 1 1 0 4.3h-.14A1.8 1.8 0 0 0 19.4 15Z"></path></svg>
+          </button>
+        </form>
+
+        <button class="quick-toggle" type="button" data-toggle-prompts hidden>
+          <span>⌄</span>
+          <span data-toggle-label>Hide quick questions</span>
+        </button>
+
+        <div class="prompt-grid" aria-label="Suggested questions">
+          <button type="button" data-view="me" data-prompt="Summarize Raheem's professional background."><span>Me</span></button>
+          <button type="button" data-view="projects" data-prompt="Which projects best show Raheem's AI and software interests?"><span>Projects</span></button>
+          <button type="button" data-view="skills" data-prompt="What technical tools and platforms has Raheem worked with?"><span>Skills</span></button>
+          <button type="button" data-view="fun" data-prompt="What kind of roles is Raheem suited for?"><span>Fun</span></button>
+          <button type="button" data-view="contact" data-prompt="How can I contact Raheem?"><span>Contact</span></button>
+        </div>
+
+        <div class="chat-log" data-chat-log aria-live="polite" hidden></div>
+      </section>
+
+      <section class="highlights" aria-label="Resume highlights">
+        <article>
+          <span>Current</span>
+          <strong>Systems Engineer</strong>
+          <p>Sutherland Global Services, supporting end users, deployments, documentation, virtual desktop, VPN, and endpoint compliance.</p>
+        </article>
+        <article>
+          <span>Projects</span>
+          <strong>Medi-Link & Begoogable</strong>
+          <p>NFC emergency medical data design and AI-powered website generation with editable structures and stronger local business content.</p>
+        </article>
+        <article>
+          <span>Education</span>
+          <strong>B.S. Computer Science</strong>
+          <p>University of the People, with Java, C, systems analysis, database concepts, and GUI coursework.</p>
+        </article>
+      </section>
+    </main>
+
+    <div class="drawer-backdrop" data-settings hidden>
+      <aside class="drawer" aria-label="AI settings">
+        <div class="drawer-header">
+          <div>
+            <p class="eyebrow">Google Gemini</p>
+            <h2>API key</h2>
+          </div>
+          <button class="icon-button dark" type="button" data-close-settings aria-label="Close settings">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <label class="field">
+          <span>Gemini API key</span>
+          <input data-api-key type="password" placeholder="Paste key">
+        </label>
+        <div class="drawer-actions">
+          <button class="primary-action" type="button" data-save-key>Save locally</button>
+          <button class="secondary-action" type="button" data-clear-key>Clear</button>
+        </div>
+        <p class="note">Without a key, answers use the built-in CV engine. With a key, the browser sends the question and CV context to Gemini.</p>
+      </aside>
+    </div>
+
+    <div class="drawer-backdrop" data-profile hidden>
+      <aside class="drawer wide" aria-label="Profile details">
+        <div class="drawer-header">
+          <div>
+            <p class="eyebrow">Profile</p>
+            <h2>Raheem Burgess</h2>
+          </div>
+          <button class="icon-button dark" type="button" data-close-panel aria-label="Close profile">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+          </button>
+        </div>
+        <div class="profile-details">
+          <p>IT Support and Systems Engineering professional with 4+ years of experience across service desk support, workstation troubleshooting, internal software rollouts, endpoint compliance, technical documentation, and remote-work readiness.</p>
+          <ul>
+            <li>Location: Kingston, Jamaica</li>
+            <li>Email: <a href="mailto:raheemburgess86@gmail.com">raheemburgess86@gmail.com</a></li>
+            <li>Phone: <a href="tel:+18764598150">876-459-8150</a></li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

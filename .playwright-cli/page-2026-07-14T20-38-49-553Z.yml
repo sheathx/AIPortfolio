@@ -1,0 +1,38 @@
+- generic [ref=e1]:
+  - banner [ref=e3]:
+    - link "Raheem Burgess home" [ref=e4] [cursor=pointer]:
+      - /url: "#home"
+      - generic [ref=e5]: RB
+      - generic [ref=e6]: Raheem Burgess
+  - main [ref=e7]:
+    - generic [ref=e48]:
+      - generic [ref=e50]: Summarize Raheem's professional background.
+      - generic [ref=e51]:
+        - generic [ref=e54]:
+          - heading "Raheem Burgess" [level=2] [ref=e55]
+          - generic [ref=e56]:
+            - generic [ref=e57]: Kingston, Jamaica
+            - generic [ref=e58]: 4+ years experience
+          - paragraph [ref=e59]: Hey. I'm Raheem, an IT Support and Systems Engineering professional focused on service desk operations, workstation support, deployment coordination, endpoint compliance, and clear technical documentation.
+          - generic [ref=e60]:
+            - generic [ref=e61]: Systems Engineer
+            - generic [ref=e62]: Service Desk
+            - generic [ref=e63]: Endpoint Support
+            - generic [ref=e64]: AI Web Tools
+        - generic [ref=e65]:
+          - paragraph [ref=e66]: I currently support users and systems at Sutherland Global Services while pursuing a B.S. in Computer Science. I like work that connects practical support, infrastructure readiness, documentation, and software ideas that solve real problems.
+          - paragraph [ref=e67]: My background includes Azure Virtual Desktop, BeyondTrust, Microsoft 365, SCCM communication checks, SentinelOne/S1, BitLocker, Zscaler, VPN validation, ticketing workflows, Excel reporting, Java, C, HTML, CSS, WordPress, Shopify, and database concepts.
+    - region "AI resume assistant" [ref=e14]:
+      - generic [ref=e15]:
+        - textbox "Ask a question about Raheem's CV" [ref=e16]:
+          - /placeholder: Ask me anything...
+        - button "Send question" [disabled] [ref=e17]
+      - button "⌄ Hide quick questions" [ref=e68] [cursor=pointer]:
+        - generic [ref=e69]: ⌄
+        - generic [ref=e70]: Hide quick questions
+      - generic "Suggested questions" [ref=e24]:
+        - button "Me" [active] [ref=e25] [cursor=pointer]
+        - button "Projects" [ref=e27] [cursor=pointer]
+        - button "Skills" [ref=e29] [cursor=pointer]
+        - button "Fun" [ref=e31] [cursor=pointer]
+        - button "Contact" [ref=e33] [cursor=pointer]
