@@ -1,7 +1,15 @@
 (function () {
-  const GEMINI_MODEL = "gemini-3.5-flash";
-  const GEMINI_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/interactions";
+  const GEMINI_MODEL_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models";
+  const GEMINI_FALLBACK_MODELS = [
+    "models/gemini-3.5-flash",
+    "models/gemini-3.1-flash",
+    "models/gemini-3-flash",
+    "models/gemini-2.5-flash-lite",
+    "models/gemini-2.0-flash"
+  ];
   const KEY_STORAGE = "raheem-gemini-api-key";
+  const GEMINI_SYSTEM_INSTRUCTION =
+    "You are Raheem Burgess' AI portfolio assistant. Answer in first person where natural. Use only the CV context and social links provided. If a detail is not in the context, say that it is not listed in the CV. Keep answers concise, specific, and recruiter-friendly. If the visitor greets you at the start of a conversation, greet them naturally and briefly offer to answer questions about Raheem's experience, projects, skills, education, or contact details. Do not reintroduce yourself on every answer; after the first turn, answer the user's question directly.";
 
   const resumeContext = `
 RAHEEM BURGESS
@@ -40,6 +48,8 @@ Language: English.
 `;
 
   const cannedAnswers = {
+    greeting:
+      "Hey, I’m Raheem’s AI portfolio assistant. Ask me about his experience, projects, skills, education, or how to contact him.",
     background:
       "Raheem Burgess is an IT Support and Systems Engineering professional in Kingston, Jamaica with 4+ years of experience across service desk support, workstation troubleshooting, software deployments, remote-work support, endpoint compliance, and technical documentation. He is currently a Systems Engineer at Sutherland Global Services and is pursuing a B.S. in Computer Science at University of the People.",
     tools:
@@ -75,6 +85,14 @@ Language: English.
   const folderCards = document.querySelector("[data-folder-cards]");
   const closeFolder = document.querySelector("[data-close-folder]");
   const folderButtons = Array.from(document.querySelectorAll("[data-folder]"));
+  const sendSound = new Audio("./assets/messagesent.mp3");
+  const receiveSound = new Audio("./assets/messagereceived.mp3");
+  const chatHistory = [];
+
+  sendSound.preload = "auto";
+  receiveSound.preload = "auto";
+  sendSound.volume = 0.42;
+  receiveSound.volume = 0.36;
 
   const folderContent = {
     experience: {
@@ -308,6 +326,45 @@ Language: English.
     return lines.map((line) => `<p>${line.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")}</p>`).join("");
   }
 
+  function playSound(sound) {
+    sound.currentTime = 0;
+    sound.play().catch(() => {});
+  }
+
+  function isGreeting(question) {
+    return /^(hi|hello|hey|yo|sup|good morning|good afternoon|good evening)[!.\s]*$/i.test(question.trim());
+  }
+
+  function resetChatHistory() {
+    chatHistory.length = 0;
+  }
+
+  function appendThreadMessage(role, content, options = {}) {
+    const message = document.createElement("article");
+    message.className = `thread-message ${role === "user" ? "thread-user" : "thread-assistant"}`;
+    if (options.loading) {
+      message.setAttribute("aria-label", "Raheem AI is typing");
+      message.innerHTML = `<span class="thread-label">Raheem AI</span><div class="typing"><span></span><span></span><span></span></div>`;
+    } else {
+      message.innerHTML = `<span class="thread-label">${role === "user" ? "You" : "Raheem AI"}</span>${markdownish(content)}`;
+    }
+    responseContent.appendChild(message);
+    requestAnimationFrame(() => message.classList.add("is-visible"));
+    message.scrollIntoView({ behavior: "smooth", block: "end" });
+    return message;
+  }
+
+  function appendThreadRichAnswer(html) {
+    const message = document.createElement("article");
+    message.className = "thread-message thread-assistant thread-rich-answer";
+    message.innerHTML = `<span class="thread-label">Raheem AI</span>${html}`;
+    responseContent.appendChild(message);
+    requestAnimationFrame(() => message.classList.add("is-visible"));
+    message.scrollIntoView({ behavior: "smooth", block: "end" });
+    attachResponseControls();
+    return message;
+  }
+
   function appendMessage(role, content, options = {}) {
     chatLog.hidden = false;
     const message = document.createElement("article");
@@ -329,6 +386,7 @@ Language: English.
 
   function exitChatMode(options = {}) {
     pageShell.classList.remove("chat-mode", "prompts-hidden");
+    responseStage.classList.remove("thread-mode");
     responseStage.hidden = true;
     quickToggle.hidden = true;
     quickToggleLabel.textContent = "Hide quick questions";
@@ -336,6 +394,7 @@ Language: English.
     responseContent.innerHTML = "";
     responseContent.classList.remove("is-visible");
     stageTyping.hidden = true;
+    resetChatHistory();
     input.value = "";
     submit.disabled = true;
     window.scrollTo({ top: 0, behavior: options.smooth === false ? "auto" : "smooth" });
@@ -352,10 +411,14 @@ Language: English.
   function enterChatMode(question, options = {}) {
     if (options.updateHistory !== false) syncChatHistory();
     pageShell.classList.add("chat-mode");
+    responseStage.classList.toggle("thread-mode", options.thread === true);
     responseStage.hidden = false;
     quickToggle.hidden = false;
     currentQuery.textContent = question;
-    responseContent.innerHTML = "";
+    if (options.resetContent !== false) {
+      responseContent.innerHTML = "";
+      responseContent.classList.remove("chat-thread");
+    }
     responseContent.classList.remove("is-visible");
     stageTyping.hidden = false;
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -442,6 +505,7 @@ Language: English.
   async function showRichView(view, question) {
     const selected = richViews[view] || null;
     const displayQuestion = question || selected?.question || "Ask me anything";
+    resetChatHistory();
     enterChatMode(displayQuestion);
     await new Promise((resolve) => setTimeout(resolve, selected ? 650 : 360));
     if (selected) {
@@ -454,9 +518,66 @@ Language: English.
       const answer = apiKey ? await askGemini(displayQuestion, apiKey) : selectLocalAnswer(displayQuestion);
       revealContent(renderPlainAnswer(answer));
     } catch (error) {
-      console.error(error);
-      revealContent(renderPlainAnswer(`${selectLocalAnswer(displayQuestion)}\n\nGemini could not respond with the saved key, so this answer came from the built-in CV engine.`));
+      console.error("Gemini request failed:", error);
+      revealContent(renderPlainAnswer(`${selectLocalAnswer(displayQuestion)}\n\nGemini could not respond with the saved key. Check that the key is valid, unrestricted for this domain, and enabled for the Gemini API.`));
     }
+  }
+
+  async function showChatAnswer(question) {
+    const firstMessage = chatHistory.length === 0;
+    enterChatMode(firstMessage ? "Conversation" : currentQuery.textContent || "Conversation", { resetContent: firstMessage, thread: true });
+    currentQuery.textContent = "Conversation";
+    stageTyping.hidden = true;
+    responseContent.classList.add("chat-thread", "is-visible");
+
+    appendThreadMessage("user", question);
+    chatHistory.push({ role: "user", text: question });
+    playSound(sendSound);
+
+    const loading = appendThreadMessage("assistant", "", { loading: true });
+    const apiKey = localStorage.getItem(KEY_STORAGE);
+
+    try {
+      const priorHistory = chatHistory.slice(0, -1).filter((message) => message.includeInGemini !== false);
+      const answer = apiKey ? await askGemini(question, apiKey, priorHistory) : selectLocalAnswer(question);
+      loading.remove();
+      appendThreadMessage("assistant", answer);
+      chatHistory.push({ role: "assistant", text: answer });
+      playSound(receiveSound);
+    } catch (error) {
+      console.error("Gemini request failed:", error);
+      const fallback = `${selectLocalAnswer(question)}\n\nGemini could not respond with the saved key. Check that the key is valid, unrestricted for this domain, and enabled for the Gemini API.`;
+      loading.remove();
+      appendThreadMessage("assistant", fallback);
+      chatHistory.push({ role: "assistant", text: fallback });
+      playSound(receiveSound);
+    }
+  }
+
+  async function showQuickThreadAnswer(view, question) {
+    const selected = richViews[view] || null;
+    const displayQuestion = question || selected?.question || "Ask me anything";
+    const firstMessage = chatHistory.length === 0;
+    enterChatMode(firstMessage ? "Conversation" : currentQuery.textContent || "Conversation", { resetContent: firstMessage, thread: true });
+    currentQuery.textContent = "Conversation";
+    stageTyping.hidden = true;
+    responseContent.classList.add("chat-thread", "is-visible");
+
+    appendThreadMessage("user", displayQuestion);
+    chatHistory.push({ role: "user", text: displayQuestion, includeInGemini: false });
+    playSound(sendSound);
+
+    await new Promise((resolve) => setTimeout(resolve, 180));
+
+    if (selected) {
+      appendThreadRichAnswer(selected.html);
+      chatHistory.push({ role: "assistant", text: selected.question, includeInGemini: false });
+    } else {
+      const answer = selectLocalAnswer(displayQuestion);
+      appendThreadMessage("assistant", answer);
+      chatHistory.push({ role: "assistant", text: answer, includeInGemini: false });
+    }
+    playSound(receiveSound);
   }
 
   function setQuestion(value) {
@@ -467,6 +588,7 @@ Language: English.
 
   function selectLocalAnswer(question) {
     const q = question.toLowerCase();
+    if (/^(hi|hello|hey|yo|sup|good morning|good afternoon|good evening)[!.\s]*$/.test(q)) return cannedAnswers.greeting;
     if (/(contact|email|phone|linkedin|github|social|instagram|twitter|x\b)/.test(q)) return cannedAnswers.contact;
     if (/(tool|platform|stack|software|technology|tech|skill|skills)/.test(q)) return cannedAnswers.tools;
     if (/(project|portfolio|medi-link|medilink|begoogable|nfc|java|c app|utility|bluebook)/.test(q)) return cannedAnswers.projects;
@@ -479,50 +601,138 @@ Language: English.
     ].join("\n\n");
   }
 
-  async function askGemini(question, apiKey) {
+  function getGenerateContentText(data) {
+    return data.candidates
+      ?.flatMap((candidate) => candidate.content?.parts || [])
+      ?.map((part) => part.text || "")
+      ?.join("")
+      ?.trim();
+  }
+
+  function buildGeminiContents(question, history) {
+    const contents = [];
+    const prior = history || [];
+
+    if (prior.length > 0) {
+      prior.forEach((message, index) => {
+        const role = message.role === "assistant" ? "model" : "user";
+        const text =
+          index === 0 && role === "user"
+            ? `CV CONTEXT:\n${resumeContext}\n\nUSER QUESTION:\n${message.text}`
+            : message.text;
+        contents.push({ role, parts: [{ text }] });
+      });
+      contents.push({ role: "user", parts: [{ text: question }] });
+      return contents;
+    }
+
+    contents.push({
+      role: "user",
+      parts: [{ text: `CV CONTEXT:\n${resumeContext}\n\nUSER QUESTION:\n${question}` }]
+    });
+    return contents;
+  }
+
+  function getModelScore(modelName) {
+    const name = modelName.toLowerCase();
+    if (name.includes("3.5") && name.includes("flash")) return 100;
+    if (name.includes("3.1") && name.includes("flash")) return 95;
+    if (name.includes("3") && name.includes("flash")) return 90;
+    if (name.includes("2.5") && name.includes("flash-lite")) return 80;
+    if (name.includes("2.5") && name.includes("flash")) return 75;
+    if (name.includes("2.0") && name.includes("flash")) return 70;
+    if (name.includes("flash")) return 60;
+    return 0;
+  }
+
+  function normalizeModelName(modelName) {
+    return modelName.startsWith("models/") ? modelName : `models/${modelName}`;
+  }
+
+  async function requestJson(url, apiKey, options = {}) {
     const controller = new AbortController();
-    const timeout = window.setTimeout(() => controller.abort(), 8500);
-    let response;
+    const timeout = window.setTimeout(() => controller.abort(), options.timeout || 30000);
+    const method = options.method || "POST";
     try {
-      response = await fetch(GEMINI_ENDPOINT, {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
           "x-goog-api-key": apiKey
         },
-        body: JSON.stringify({
-          model: GEMINI_MODEL,
-          system_instruction:
-            "You are Raheem Burgess' AI portfolio assistant. Answer in first person where natural. Use only the CV context and social links provided. If a detail is not in the context, say that it is not listed in the CV. Keep answers concise, specific, and recruiter-friendly.",
-          input: `CV CONTEXT:\n${resumeContext}\n\nUSER QUESTION:\n${question}`,
-          generation_config: {
-            temperature: 0.35,
-            thinking_level: "low"
-          }
-        })
+        body: options.body ? JSON.stringify(options.body) : undefined
       });
+
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : {};
+      if (!response.ok) {
+        const message = data.error?.message || text || `Gemini request failed with ${response.status}`;
+        throw new Error(message);
+      }
+      return data;
     } finally {
       window.clearTimeout(timeout);
     }
+  }
 
-    if (!response.ok) {
-      const detail = await response.text();
-      throw new Error(detail || `Gemini request failed with ${response.status}`);
+  async function getSupportedGeminiModels(apiKey) {
+    try {
+      const data = await requestJson(GEMINI_MODEL_ENDPOINT, apiKey, {
+        method: "GET",
+        timeout: 12000
+      });
+      const models = (data.models || [])
+        .filter((model) => model.supportedGenerationMethods?.includes("generateContent"))
+        .map((model) => model.name)
+        .filter(Boolean)
+        .sort((a, b) => getModelScore(b) - getModelScore(a));
+
+      return models.length ? models : GEMINI_FALLBACK_MODELS;
+    } catch (error) {
+      console.warn("Could not list Gemini models; using fallback models.", error);
+      return GEMINI_FALLBACK_MODELS;
+    }
+  }
+
+  async function askGeminiGenerateContent(question, apiKey, model, history = []) {
+    const modelName = normalizeModelName(model);
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent`;
+    const data = await requestJson(endpoint, apiKey, {
+      timeout: 30000,
+      body: {
+        systemInstruction: {
+          parts: [{ text: GEMINI_SYSTEM_INSTRUCTION }]
+        },
+        contents: buildGeminiContents(question, history),
+        generationConfig: {
+          temperature: 0.35
+        }
+      }
+    });
+
+    const text = getGenerateContentText(data);
+    if (!text) throw new Error("Gemini returned no text.");
+    return text;
+  }
+
+  async function askGemini(question, apiKey, history = []) {
+    const errors = [];
+    const models = await getSupportedGeminiModels(apiKey);
+
+    for (const model of models) {
+      try {
+        return await askGeminiGenerateContent(question, apiKey, model, history);
+      } catch (error) {
+        errors.push(`generateContent ${model}: ${error.message}`);
+      }
     }
 
-    const data = await response.json();
-    if (data.output_text) return data.output_text;
-    const textFromSteps = data.steps
-      ?.flatMap((step) => step.content || [])
-      ?.filter((content) => content.type === "text")
-      ?.map((content) => content.text)
-      ?.join("");
-    return textFromSteps || selectLocalAnswer(question);
+    throw new Error(errors.join(" | "));
   }
 
   async function handleQuestion(question) {
-    await showRichView(null, question);
+    await showChatAnswer(question);
   }
 
   form.addEventListener("submit", (event) => {
@@ -539,7 +749,7 @@ Language: English.
   });
 
   document.querySelectorAll("[data-prompt]").forEach((button) => {
-    button.addEventListener("click", () => showRichView(button.dataset.view, button.dataset.prompt || ""));
+    button.addEventListener("click", () => showQuickThreadAnswer(button.dataset.view, button.dataset.prompt || ""));
   });
 
   closeChat.addEventListener("click", closeChatMode);

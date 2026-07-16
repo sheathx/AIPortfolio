@@ -467,6 +467,93 @@ h1 {
   animation: bubble-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.thread-mode .query-bubble {
+  display: none;
+}
+
+.chat-thread {
+  display: grid;
+  gap: 10px;
+  padding-bottom: 260px;
+}
+
+.thread-message {
+  width: fit-content;
+  max-width: min(680px, 78%);
+  border: 0;
+  border-radius: 28px;
+  padding: 10px 16px 12px;
+  opacity: 0;
+  scroll-margin-bottom: 220px;
+  transform: translateY(14px);
+  box-shadow: none;
+}
+
+.thread-message.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.28s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.thread-user {
+  justify-self: center;
+  max-width: min(560px, 86vw);
+  border-radius: 999px;
+  background: #2f7df6;
+  color: #fff;
+  padding: 11px 20px;
+  text-align: center;
+  box-shadow: 0 12px 36px rgba(47, 125, 246, 0.22);
+}
+
+.thread-assistant {
+  justify-self: start;
+  max-width: min(620px, 72%);
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  border-bottom-left-radius: 9px;
+  background: rgba(244, 244, 245, 0.92);
+  color: #202126;
+  backdrop-filter: blur(14px);
+}
+
+.thread-message p,
+.thread-message ul {
+  margin-bottom: 0;
+}
+
+.thread-message p {
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.thread-user .thread-label {
+  display: none;
+}
+
+.thread-user p {
+  font-size: 0.92rem;
+  font-weight: inherit;
+  line-height: 1.25;
+}
+
+.thread-message p + p {
+  margin-top: 12px;
+}
+
+.thread-message ul {
+  padding-left: 20px;
+}
+
+.thread-label {
+  display: block;
+  margin-bottom: 5px;
+  color: inherit;
+  font-size: 0.66rem;
+  font-weight: 850;
+  opacity: 0.68;
+  text-transform: uppercase;
+}
+
 .typing-row {
   display: inline-flex;
   gap: 7px;
@@ -1761,6 +1848,29 @@ h1 {
   .query-bubble {
     margin-bottom: 24px;
     padding: 11px 18px;
+  }
+
+  .thread-message {
+    max-width: 86%;
+    border-radius: 22px;
+  }
+
+  .chat-thread {
+    padding-bottom: 240px;
+  }
+
+  .thread-user {
+    max-width: min(560px, 86vw);
+    padding: 11px 18px;
+  }
+
+  .thread-user p {
+    font-size: 0.92rem;
+  }
+
+  .thread-assistant {
+    max-width: 86%;
+    border-bottom-left-radius: 8px;
   }
 
   .answer-section p {
