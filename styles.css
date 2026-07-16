@@ -516,6 +516,16 @@ h1 {
   backdrop-filter: blur(14px);
 }
 
+.thread-rich-answer {
+  width: min(900px, 100%);
+  max-width: 100%;
+  padding: 18px;
+}
+
+.thread-rich-answer .answer-section + .answer-section {
+  margin-top: 18px;
+}
+
 .thread-message p,
 .thread-message ul {
   margin-bottom: 0;
